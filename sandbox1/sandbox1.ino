@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 const int analogPin = A0;   // Potentiometer connected to A0
 const int outputPin = 9;    // Output pin (PWM)
 const int ledPin = 13;      // Onboard LED pin
