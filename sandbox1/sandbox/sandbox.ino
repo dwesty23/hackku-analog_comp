@@ -1,39 +1,47 @@
-const int analogPin = A0;   // Potentiometer connected to A0
-const int outputPin = 9;    // Output pin (PWM)
-const int ledPin = 13;      // Onboard LED pin
-float phase = 0.0;          // Phase of the sine wave
+const int analogPin = A0;      // Potentiometer connected to A0
+const int outputPin = 9;       // Output pin (DAC)
+const int ledPin = 13;         // Onboard LED pin
+const float samplingFrequency = 50000.0;  // Sampling frequency (Hz)
 float frequency = 1.0;      // Frequency of the sine wave (initially set to 1 Hz)
-float previousSineValue = 0.0;  // To track changes in sine value
+float phaseIncrement = 0.0;    // Phase increment based on frequency
+float phase = 0.0;             // Phase of the sine wave
+const int tableSize = 256;     // Size of the sine wave lookup table
+int sinTable[tableSize];       // Lookup table for the sine wave
 
 void setup() {
   Serial.begin(9600);
   pinMode(outputPin, OUTPUT);
   pinMode(ledPin, OUTPUT);  // Set the LED pin as output
+
+  // Populate sine wave lookup table
+  for (int i = 0; i < tableSize; i++) {
+    sinTable[i] = (int)(127.5 * (1 + sin(2 * PI * i / tableSize)));
+  }
+
+  // Calculate phase increment based on sampling frequency
+  phaseIncrement = 2 * PI * frequency / samplingFrequency;
 }
 
 void loop() {
-  int analogValue = 1; // For initial testing, set to a fixed value
-  frequency = map(analogValue, 0, 1023, 1, 5);    // Map input value to frequency range 1-5 Hz
+  int analogValue = analogRead(analogPin);
+  float frequency = map(analogValue, 0, 1023, 1, 5);  // Map input value to frequency range 1-5 Hz
 
-  float Value = sin(phase);                   // Calculate sine value from phase
-  int pwmValue = map((Value * 127.5) + 127.5, 0, 255, 0, 255);  // Convert sine to PWM
-  analogWrite(outputPin, pwmValue);               // Output the PWM signal to pin
+  for (int i = 0; i < (int)(samplingFrequency / frequency); i++) {
+    int sinIndex = (int)(phase * (tableSize / (2 * PI))) % tableSize; // Index into the lookup table
+    analogWrite(outputPin, sinTable[sinIndex]); // Output the value from the lookup table
+
+    phase += phaseIncrement;
+    if (phase >= 2 * PI) {
+      phase -= 2 * PI;
+    }
+  }
 
   // Blink logic for LED at maximum and minimum
-  if (Value >= 0.999 && previousSineValue < 0.999) { // Close to maximum
+  if (sin(phase) >= 0.999) { // Close to maximum
     blinkLED(1);
-  } else if (Value <= -0.999 && previousSineValue > -0.999) { // Close to minimum
+  } else if (sin(phase) <= -0.999) { // Close to minimum
     blinkLED(2);
   }
-
-  previousSineValue = Value; // Update previous sine value for next comparison
-
-  phase += 2 * PI * frequency / 1000;             // Increase phase based on frequency and time
-  if (phase >= 2 * PI) {                          // Reset phase after completing a cycle
-    phase -= 2 * PI;
-  }
-
-  delay(1);                                       // Small delay to stabilize output
 }
 
 void blinkLED(int count) {
@@ -44,4 +52,3 @@ void blinkLED(int count) {
     delay(100);                  // Wait 100 milliseconds
   }
 }
-
