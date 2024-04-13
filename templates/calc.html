@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Sexy Calculator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  .calculator {
+    width: 300px;
+    margin: 50px auto;
+    background-color: #333;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 5px;
+  }
+  input[type="text"] {
+    grid-column: 1 / span 4;
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    border: none;
+    border-radius: 5px;
+  }
+  input[type="button"] {
+    padding: 10px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+  }
+  input[type="button"]:hover {
+    background-color: #777;
+  }
+  #equal {
+    grid-column: 3 / span 2;
+    background-color: #f44336;
+  }
+  #clear {
+    grid-column: 1 / span 2;
+    background-color: #e1dbda;
+  }
+  #zero {
+    grid-column: 1 / span 2;
+  }
+  #plus {
+    grid-column: 4 / span 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <input type="text" id="display" readonly>
+  <input type="button" value="7" onclick="appendNumber(7)">
+  <input type="button" value="8" onclick="appendNumber(8)">
+  <input type="button" value="9" onclick="appendNumber(9)">
+  <input type="button" value="/" onclick="appendOperator('/')">
+  <input type="button" value="4" onclick="appendNumber(4)">
+  <input type="button" value="5" onclick="appendNumber(5)">
+  <input type="button" value="6" onclick="appendNumber(6)">
+  <input type="button" value="*" onclick="appendOperator('*')">
+  <input type="button" value="1" onclick="appendNumber(1)">
+  <input type="button" value="2" onclick="appendNumber(2)">
+  <input type="button" value="3" onclick="appendNumber(3)">
+  <input type="button" value="-" onclick="appendOperator('-')">
+  <input type="button" value="0" id = "zero" onclick="appendNumber(0)">
+  <input type="button" value="." onclick="appendNumber('.')">
+  <input type="button" value="+" id="plus" onclick="appendOperator('+')">
+  <input type="button" value="C" id="clear" onclick="clearDisplay()">
+  <input type="button" value="=" id="equal" onclick="calculate()">
+  
+</div>
+
+<script>
+    function appendNumber(num) {
+      document.getElementById('display').value += num;
+    }
+  
+    function appendOperator(operator) {
+      document.getElementById('display').value += operator;
+    }
+  
+    function clearDisplay() {
+      document.getElementById('display').value = '';
+    }
+  
+    function calculate() {
+      var equation = document.getElementById('display').value;
+  
+      // Send the equation to the Python script
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "http://localhost:5000/calculate", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var result = xhr.responseText;
+          document.getElementById('display').value = result;
+        }
+      };
+      xhr.send(JSON.stringify({ equation: equation }));
+    }
+  </script>
+
+</body>
+</html>
