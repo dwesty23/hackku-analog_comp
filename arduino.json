@@ -1,0 +1,7 @@
+{
+    "sketch": "hackku-analog_comp.ino",
+    "output": "./build",
+    "port": "COM9",  
+    "board": "arduino:avr:uno"
+}
+  

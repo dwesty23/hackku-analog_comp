@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "hackku-analog_comp.ino",
+    "port": "COM9",
+    "programmer": "avrispmkii"
+}
